@@ -23,6 +23,8 @@ SOFTWARE.
 */
 
 #include "../../agwin/src/agwincore.h"
+#include "../../agwin/src/agwinmsg.h"
+#include <agon/vdp_vdu.h>
 
 extern AwAppHeader _agwin_header;
 const AwFcnTable* core;
@@ -66,9 +68,43 @@ int main( void )
 	return 0;
 }
 
+int32_t on_paint_window(AwWindow* window, AwMsg* msg, bool* halt) {
+    *halt = true; // no more handling after this
+    (*core->paint_window)(msg); // paint borders and title bar, if needed
+
+    AwDoMsgPaintWindow* paint_msg = &msg->do_paint_window;
+
+    if (!window->state.visible) {
+        return 0;
+    }
+
+    AwPaintFlags* paint_flags = &paint_msg->flags;
+    if (paint_flags->client || paint_flags->window) {
+        (*core->set_client_viewport)(window);
+        vdp_set_graphics_colour(0, window->bg_color | 0x80);
+        vdp_set_graphics_colour(0, window->fg_color);
+        int16_t center_x = (window->client_rect.left + window->client_rect.right) / 2;
+        int16_t center_y = (window->client_rect.top + window->client_rect.bottom) / 2;
+        vdp_move_to(center_x - 10, center_y - 10);
+        vdp_plot(0x95, center_x + 10 - 1, center_y + 10 - 1);
+    }
+
+    return 0;
+}
+
 int32_t winclock_handle_message(AwWindow* window, AwMsg* msg, bool* halt) {
     (void)window; // presently unused
     (void)msg; // presently unused
     (void)halt; // presently unused
+
+    switch (msg->do_common.msg_type) {
+        case Aw_Do_PaintWindow: {
+            break;
+        }
+
+        default: {
+            break;
+        }
+    }
 	return 0; // default to core processing
 }

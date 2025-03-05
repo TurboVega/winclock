@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "agwindefs.h": "c",
-        "agwincore.h": "c"
+        "agwincore.h": "c",
+        "agwindo.h": "c"
     }
 }
