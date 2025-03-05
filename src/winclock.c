@@ -69,14 +69,15 @@ int main( void )
 }
 
 int32_t on_paint_window(AwWindow* window, AwMsg* msg, bool* halt) {
+    return 0;
     *halt = true; // no more handling after this
-    (*core->paint_window)(msg); // paint borders and title bar, if needed
-
-    AwDoMsgPaintWindow* paint_msg = &msg->do_paint_window;
-
     if (!window->state.visible) {
         return 0;
     }
+
+    (*core->paint_window)(msg); // paint borders and title bar, if needed
+
+    AwDoMsgPaintWindow* paint_msg = &msg->do_paint_window;
 
     AwPaintFlags* paint_flags = &paint_msg->flags;
     if (paint_flags->client || paint_flags->window) {
@@ -93,12 +94,9 @@ int32_t on_paint_window(AwWindow* window, AwMsg* msg, bool* halt) {
 }
 
 int32_t winclock_handle_message(AwWindow* window, AwMsg* msg, bool* halt) {
-    (void)window; // presently unused
-    (void)msg; // presently unused
-    (void)halt; // presently unused
-
     switch (msg->do_common.msg_type) {
         case Aw_Do_PaintWindow: {
+            on_paint_window(window, msg, halt);
             break;
         }
 
