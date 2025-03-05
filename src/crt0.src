@@ -119,6 +119,7 @@ end macro
 
 section .header 			; The location of this is set by locate .header in makefile.mk
 
+__agwin_header:
 	jp	__start			; Jump to start
 
 ; The header stuff required by AgWin
@@ -128,7 +129,6 @@ section .header 			; The location of this is set by locate .header in makefile.m
     public  __agwin_ptr_app
     public  __agwin_fcn_table
 
-__agwin_header:
 _exec_name:
 	db	PROG_NAME, ".bin", 0	; The executable name, only used in argv
 
