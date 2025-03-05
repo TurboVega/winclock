@@ -291,7 +291,7 @@ __start._main := $ - 3
 
 ; make it look like we are arriving here from a call to exit()
 ___exithl:
-	push 	hl  				; dummy value for return address
+	push 	hl  			; dummy value for return address
 	push 	hl 				; return code from main
 
 ; entry point for void exit(int status) function
@@ -428,7 +428,7 @@ end if
 
 	public	__Exit
 __Exit: 				; if called _Exit() unwanted return address (to be discarded)
-					; and exit code will be on the stack
+						; and exit code will be on the stack
 	pop 	de 			; get rid of return address
 	pop 	hl 			; get return code in hl ready for end of program
 	jr	skip._abort
@@ -470,7 +470,7 @@ end if
 	POP	IY				; Restore registers before exiting the program
 	POP	IX
 	POP	DE
-	POP 	BC
+	POP BC
 	POP	AF
 
 	RET					; exit the program 
