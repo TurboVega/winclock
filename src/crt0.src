@@ -124,18 +124,23 @@ section .header 			; The location of this is set by locate .header in makefile.m
 ; The header stuff required by AgWin
 ; --------------------------------
 
+    public  __agwin_header
+    public  __agwin_ptr_app
+    public  __agwin_fcn_table
+
+__agwin_header:
 _exec_name:
 	db	PROG_NAME, ".bin", 0	; The executable name, only used in argv
 
 	align	64  	; The executable header is from byte 64 onwards
-    public  __agwin_header
-    public  __agwin_ptr_app
-__agwin_header:
 	db	"WIN"		; Flag for AgWin - to confirm this is a valid AgWin binary
 	db	00h			; AgWin header version 0
 	db	01h			; Flag for run mode (0: Z80, 1: ADL)
+    dl  __agwin_header ; Holds the load address of this application
 __agwin_ptr_app:
     dl  0           ; Points to the AwApplication structure for this application
+__agwin_fcn_table:
+    dl  0           ; Points to the function table for AgWin core functions
 
 ; In CE Toolchain there are a few things before __start
 ; -----------------------------------------------------
@@ -156,10 +161,9 @@ __start:				; entry point - this will normally by at $040045
 	PUSH	IX
 	PUSH	IY			; Need to preserve IY for MOS
 
-; Save stack pointer and set up program specific
+; Save stack pointer and do NOT set up a program specific one
 
 	ld 	(_exit.sp), sp 		; save SP for exiting (self-modifying)
-	ld	sp, __stack		; defined in makefile.mk
 
 	PUSH	HL			; HL is the address of the cmd line param string
 
