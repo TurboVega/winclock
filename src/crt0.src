@@ -126,8 +126,8 @@ __agwin_header:
 ; --------------------------------
 
     public  __agwin_header
-    public  __agwin_ptr_app
     public  __agwin_fcn_table
+	extern  __agwin_app
 
 _exec_name:
 	db	PROG_NAME, ".bin", 0	; The executable name, only used in argv
@@ -137,10 +137,10 @@ _exec_name:
 	db	00h			; AgWin header version 0
 	db	01h			; Flag for run mode (0: Z80, 1: ADL)
     dl  __agwin_header ; Holds the load address of this application
-__agwin_ptr_app:
-    dl  0           ; Points to the AwApplication structure for this application
+    dl  __agwin_app ; Points to the AwApplication structure for this application
 __agwin_fcn_table:
     dl  0           ; Points to the function table for AgWin core functions
+	dl  __agwin_stop ; Points to the cleanup code for this application
 
 ; In CE Toolchain there are a few things before __start
 ; -----------------------------------------------------
@@ -159,7 +159,7 @@ __start:				; entry point - this will normally by at $040045
 	PUSH	BC
 	PUSH	DE
 	PUSH	IX
-	PUSH	IY			; Need to preserve IY for MOS
+	PUSH	IY
 
 ; Save stack pointer and do NOT set up a program specific one
 
@@ -274,6 +274,21 @@ else
 end if
 	public	__start._main
 __start._main := $ - 3
+
+	POP	IY				; Restore registers before exiting the program
+	POP	IX
+	POP	DE
+	POP BC
+	POP	AF
+	RET					; return to AgWin
+
+__agwin_stop:
+
+	PUSH	AF			; Preserve registers
+	PUSH	BC
+	PUSH	DE
+	PUSH	IX
+	PUSH	IY
 
 ; clear up the stack if called with argc & argv (conditionally included)
 ;
@@ -466,12 +481,6 @@ _exit.sp := $-3
 if HAS_EXIT_HANDLER
 	call 	_exit_handler
 end if
-
-	POP	IY				; Restore registers before exiting the program
-	POP	IX
-	POP	DE
-	POP BC
-	POP	AF
 
 	RET					; exit the program 
 

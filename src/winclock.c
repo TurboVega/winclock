@@ -37,37 +37,38 @@ int32_t winclock_handle_message(AwWindow* window, AwMsg* msg, bool* halt);
 
 AwClass winclock_class = { "winclock", NULL, winclock_handle_message };
 
-AwApplication winclock_app = { "winclock", 0, 0, &winclock_class, NULL, 1 };
+AwApplication _agwin_app = { "winclock", 0, 0, &winclock_class, NULL, 1 };
 
 int main( void )
 {
-    _agwin_header.app = &winclock_app;
     core = _agwin_header.core_functions;
     winclock_class.parent = (*core->get_root_class)();
 
-    AwWindowStyle style;
-    style.border = 1;
-    style.title_bar = 1;
-    style.close_icon = 1;
-    style.minimize_icon = 1;
-    style.maximize_icon = 1;
-    style.menu_icon = 1;
-    style.sizeable = 1;
-    style.moveable = 1;
+    for (int i = 0; i < 4; i++) {
+        AwWindowStyle style;
+        style.border = 1;
+        style.title_bar = 1;
+        style.close_icon = 1;
+        style.minimize_icon = 1;
+        style.maximize_icon = 1;
+        style.menu_icon = 1;
+        style.sizeable = 1;
+        style.moveable = 1;
+        style.primary = (i==0?1:0);
 
-    AwWindowState state;
-    state.active = 0;
-    state.enabled = 1;
-    state.selected = 0;
-    state.visible = 1;
+        AwWindowState state;
+        state.active = 0;
+        state.enabled = 1;
+        state.selected = 0;
+        state.visible = 1;
 
-    AwWindow* win = (*core->create_window)(&winclock_app, NULL, &winclock_class,
-        style, state, 275, 197, 100, 100, "WinClock", 0);
-    if (win) {
-        win->bg_color = 14;
-        win->fg_color = 0;
+        AwWindow* win = (*core->create_window)(&_agwin_app, NULL, &winclock_class,
+            style, state, 200+20*i, 197+30*i, 100+10*i, 100, "WinClock", 0);
+        if (win) {
+            win->bg_color = 14;
+            win->fg_color = i;
+        }
     }
-
 	return 0;
 }
 
