@@ -61,10 +61,10 @@ int main( void )
     state.visible = 1;
 
     AwWindow* win = (*core->create_window)(&winclock_app, NULL, &winclock_class,
-        style, state, 320, 240, 100, 100, "WinClock", 0);
+        style, state, 275, 197, 100, 100, "WinClock", 0);
     if (win) {
-        win->bg_color = 5;
-        win->fg_color = 7;
+        win->bg_color = 14;
+        win->fg_color = 0;
     }
 
 	return 0;
@@ -78,7 +78,6 @@ int32_t on_paint_window(AwWindow* window, AwMsg* msg, bool* halt) {
 
     (*core->paint_window)(msg); // paint borders and title bar, if needed
 
-return 0;
     AwDoMsgPaintWindow* paint_msg = &msg->do_paint_window;
 
     AwPaintFlags* paint_flags = &paint_msg->flags;
@@ -86,8 +85,9 @@ return 0;
         (*core->set_client_viewport)(window);
         vdp_set_graphics_colour(0, window->bg_color | 0x80);
         vdp_set_graphics_colour(0, window->fg_color);
-        int16_t center_x = (window->client_rect.left + window->client_rect.right) / 2;
-        int16_t center_y = (window->client_rect.top + window->client_rect.bottom) / 2;
+        AwRect rect = (*core->get_local_client_rect)(window);
+        int16_t center_x = (rect.left + rect.right) / 2;
+        int16_t center_y = (rect.top + rect.bottom) / 2;
         vdp_move_to(center_x - 10, center_y - 10);
         vdp_plot(0x95, center_x + 10 - 1, center_y + 10 - 1);
     }
