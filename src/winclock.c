@@ -71,7 +71,6 @@ int main( void )
 }
 
 int32_t on_paint_window(AwWindow* window, AwMsg* msg, bool* halt) {
-    return 0;
     *halt = true; // no more handling after this
     if (!window->state.visible) {
         return 0;
@@ -79,6 +78,7 @@ int32_t on_paint_window(AwWindow* window, AwMsg* msg, bool* halt) {
 
     (*core->paint_window)(msg); // paint borders and title bar, if needed
 
+return 0;
     AwDoMsgPaintWindow* paint_msg = &msg->do_paint_window;
 
     AwPaintFlags* paint_flags = &paint_msg->flags;
