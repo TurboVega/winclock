@@ -85,7 +85,7 @@ int32_t on_paint_window(AwWindow* window, AwMsg* msg, bool* halt) {
         (*core->set_client_viewport)(window);
         vdp_set_graphics_colour(0, window->bg_color | 0x80);
         vdp_set_graphics_colour(0, window->fg_color);
-        AwRect rect = (*core->get_local_client_rect)(window);
+        AwRect rect = (*core->get_sizing_client_rect)(window);
         int16_t center_x = (rect.left + rect.right) / 2;
         int16_t center_y = (rect.top + rect.bottom) / 2;
         vdp_move_to(center_x - 10, center_y - 10);
