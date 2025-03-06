@@ -25,6 +25,7 @@ SOFTWARE.
 #include "../../agwin/src/agwincore.h"
 #include "../../agwin/src/agwinmsg.h"
 #include <agon/vdp_vdu.h>
+#include <stdio.h>
 
 extern AwAppHeader _agwin_header;
 const AwFcnTable* core;
@@ -91,6 +92,7 @@ int32_t on_paint_window(AwWindow* window, AwMsg* msg, bool* halt) {
         vdp_move_to(center_x - 10, center_y - 10);
         vdp_plot(0x95, center_x + 10 - 1, center_y + 10 - 1);
     }
+    printf("Garbage!");
 
     return 0;
 }
@@ -98,7 +100,7 @@ int32_t on_paint_window(AwWindow* window, AwMsg* msg, bool* halt) {
 int32_t winclock_handle_message(AwWindow* window, AwMsg* msg, bool* halt) {
     switch (msg->do_common.msg_type) {
         case Aw_Do_PaintWindow: {
-            //on_paint_window(window, msg, halt);
+            on_paint_window(window, msg, halt);
             break;
         }
 
