@@ -62,8 +62,10 @@ int main( void )
 
     AwWindow* win = (*core->create_window)(&winclock_app, NULL, &winclock_class,
         style, state, 320, 240, 100, 100, "WinClock", 0);
-    win->bg_color = 5;
-    win->fg_color = 7;
+    if (win) {
+        win->bg_color = 5;
+        win->fg_color = 7;
+    }
 
 	return 0;
 }
@@ -96,7 +98,7 @@ int32_t on_paint_window(AwWindow* window, AwMsg* msg, bool* halt) {
 int32_t winclock_handle_message(AwWindow* window, AwMsg* msg, bool* halt) {
     switch (msg->do_common.msg_type) {
         case Aw_Do_PaintWindow: {
-            on_paint_window(window, msg, halt);
+            //on_paint_window(window, msg, halt);
             break;
         }
 
