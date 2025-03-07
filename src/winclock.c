@@ -147,9 +147,10 @@ int32_t on_paint_window(AwWindow* window, AwMsg* msg, bool* halt) {
             vdp_plot(0x9D, x_pos + dot_radius, y_pos + dot_radius);
         }
 
-        vdp_move_to(center_x, center_y);
+        vdp_move_to(center_x - 8*4, center_y - 8*2);
         vdp_write_at_graphics_cursor();
-        printf("%02hu:%02hu:%02hu:",
+        vdp_set_graphics_colour(0, 7);
+        printf("%02hu:%02hu:%02hu",
             rtc_data.hour, rtc_data.minute, rtc_data.second);
     }
 
