@@ -95,13 +95,12 @@ int main( void )
         }
         return 0;
     }
-
 */
 
 const struct {
     int16_t x_mul;
     int16_t y_mul;
-} multipliers[12] = {
+} hour_points[12] = {
     {    0, -256 }, // [00] time 00:00, angle 0.000000
     {  127, -221 }, // [01] time 01:00, angle 0.523599
     {  221, -128 }, // [02] time 02:00, angle 1.047198
@@ -114,6 +113,90 @@ const struct {
     { -256,    0 }, // [09] time 09:00, angle 4.712389
     { -221, -128 }, // [10] time 10:00, angle 5.235988
     { -128, -221 }, // [11] time 11:00, angle 5.759587
+};
+
+/*
+    The table below was produced by this code (and then cleaned up a bit):
+
+    #include <stdio.h>
+    #include <math.h>
+
+    int main()
+    {
+        for (int i = 0; i < 60; i++) {
+            double angle = M_PI*i/6.0/5;
+            int mx = (int)(cos(angle-M_PI/2) * 256);
+            int my = (int)(sin(angle-M_PI/2) * 256);
+            printf("{ %i, %i }, // [%02i] time 00:%02i, angle %f\n", mx, my, i, i, angle);
+        }
+        return 0;
+    }
+*/
+
+const struct {
+    int16_t x_mul;
+    int16_t y_mul;
+} second_points[60] = {
+    { 0, -256 }, // [00] time 00:00, angle 0.000000
+    { 26, -254 }, // [01] time 00:01, angle 0.104720
+    { 53, -250 }, // [02] time 00:02, angle 0.209440
+    { 79, -243 }, // [03] time 00:03, angle 0.314159
+    { 104, -233 }, // [04] time 00:04, angle 0.418879
+    { 128, -221 }, // [05] time 00:05, angle 0.523599
+    { 150, -207 }, // [06] time 00:06, angle 0.628319
+    { 171, -190 }, // [07] time 00:07, angle 0.733038
+    { 190, -171 }, // [08] time 00:08, angle 0.837758
+    { 207, -150 }, // [09] time 00:09, angle 0.942478
+    { 221, -127 }, // [10] time 00:10, angle 1.047198
+    { 233, -104 }, // [11] time 00:11, angle 1.151917
+    { 243, -79 }, // [12] time 00:12, angle 1.256637
+    { 250, -53 }, // [13] time 00:13, angle 1.361357
+    { 254, -26 }, // [14] time 00:14, angle 1.466077
+    { 256, 0 }, // [15] time 00:15, angle 1.570796
+    { 254, 26 }, // [16] time 00:16, angle 1.675516
+    { 250, 53 }, // [17] time 00:17, angle 1.780236
+    { 243, 79 }, // [18] time 00:18, angle 1.884956
+    { 233, 104 }, // [19] time 00:19, angle 1.989675
+    { 221, 128 }, // [20] time 00:20, angle 2.094395
+    { 207, 150 }, // [21] time 00:21, angle 2.199115
+    { 190, 171 }, // [22] time 00:22, angle 2.303835
+    { 171, 190 }, // [23] time 00:23, angle 2.408554
+    { 150, 207 }, // [24] time 00:24, angle 2.513274
+    { 127, 221 }, // [25] time 00:25, angle 2.617994
+    { 104, 233 }, // [26] time 00:26, angle 2.722714
+    { 79, 243 }, // [27] time 00:27, angle 2.827433
+    { 53, 250 }, // [28] time 00:28, angle 2.932153
+    { 26, 254 }, // [29] time 00:29, angle 3.036873
+    { 0, 256 }, // [30] time 00:30, angle 3.141593
+    { -26, 254 }, // [31] time 00:31, angle 3.246312
+    { -53, 250 }, // [32] time 00:32, angle 3.351032
+    { -79, 243 }, // [33] time 00:33, angle 3.455752
+    { -104, 233 }, // [34] time 00:34, angle 3.560472
+    { -128, 221 }, // [35] time 00:35, angle 3.665191
+    { -150, 207 }, // [36] time 00:36, angle 3.769911
+    { -171, 190 }, // [37] time 00:37, angle 3.874631
+    { -190, 171 }, // [38] time 00:38, angle 3.979351
+    { -207, 150 }, // [39] time 00:39, angle 4.084070
+    { -221, 127 }, // [40] time 00:40, angle 4.188790
+    { -233, 104 }, // [41] time 00:41, angle 4.293510
+    { -243, 79 }, // [42] time 00:42, angle 4.398230
+    { -250, 53 }, // [43] time 00:43, angle 4.502949
+    { -254, 26 }, // [44] time 00:44, angle 4.607669
+    { -256, 0 }, // [45] time 00:45, angle 4.712389
+    { -254, -26 }, // [46] time 00:46, angle 4.817109
+    { -250, -53 }, // [47] time 00:47, angle 4.921828
+    { -243, -79 }, // [48] time 00:48, angle 5.026548
+    { -233, -104 }, // [49] time 00:49, angle 5.131268
+    { -221, -128 }, // [50] time 00:50, angle 5.235988
+    { -207, -150 }, // [51] time 00:51, angle 5.340708
+    { -190, -171 }, // [52] time 00:52, angle 5.445427
+    { -171, -190 }, // [53] time 00:53, angle 5.550147
+    { -150, -207 }, // [54] time 00:54, angle 5.654867
+    { -127, -221 }, // [55] time 00:55, angle 5.759587
+    { -104, -233 }, // [56] time 00:56, angle 5.864306
+    { -79, -243 }, // [57] time 00:57, angle 5.969026
+    { -53, -250 }, // [58] time 00:58, angle 6.073746
+    { -26, -254 }, // [59] time 00:59, angle 6.178466
 };
 
 typedef struct {
@@ -148,11 +231,26 @@ int32_t on_paint_window(AwWindow* window, AwMsg* msg, bool* halt) {
         vdp_move_to(center_x, center_y);
         vdp_plot(0x95, center_x + radius, center_y + radius);
 
-        int16_t dot_radius = length / 40;
+        uint8_t skip = 0;
+        int16_t dot_radius = length / 80;
         radius = (length * 31) / 80;
+        for (int16_t i = 0; i < 60; i++) {
+            if (skip++ == 0) {
+                continue;
+            }
+            int16_t x_pos = center_x + (radius * second_points[i].x_mul) / 256;
+            int16_t y_pos = center_y + (radius * second_points[i].y_mul) / 256;
+            vdp_move_to(x_pos, y_pos);
+            vdp_plot(0x9D, x_pos + dot_radius, y_pos + dot_radius);
+            if (skip == 5) {
+                skip = 0;
+            }
+        }
+
+        dot_radius = length / 60;
         for (int16_t i = 0; i < 12; i++) {
-            int16_t x_pos = center_x + (radius * multipliers[i].x_mul) / 256;
-            int16_t y_pos = center_y + (radius * multipliers[i].y_mul) / 256;
+            int16_t x_pos = center_x + (radius * hour_points[i].x_mul) / 256;
+            int16_t y_pos = center_y + (radius * hour_points[i].y_mul) / 256;
             vdp_move_to(x_pos, y_pos);
             vdp_plot(0x9D, x_pos + dot_radius, y_pos + dot_radius);
         }
