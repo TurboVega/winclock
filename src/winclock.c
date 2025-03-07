@@ -44,33 +44,69 @@ int main( void )
     core = _agwin_header.core_functions;
     winclock_class.parent = (*core->get_root_class)();
 
-    for (int i = 0; i < 4; i++) {
-        AwWindowStyle style;
-        style.border = 1;
-        style.title_bar = 1;
-        style.close_icon = 1;
-        style.minimize_icon = 1;
-        style.maximize_icon = 1;
-        style.menu_icon = 1;
-        style.sizeable = 1;
-        style.moveable = 1;
-        style.primary = (i==0?1:0);
+    AwWindowStyle style;
+    style.border = 1;
+    style.title_bar = 1;
+    style.close_icon = 1;
+    style.minimize_icon = 1;
+    style.maximize_icon = 1;
+    style.menu_icon = 1;
+    style.sizeable = 1;
+    style.moveable = 1;
+    style.primary = 1;
 
-        AwWindowState state;
-        state.active = 0;
-        state.enabled = 1;
-        state.selected = 0;
-        state.visible = 1;
+    AwWindowState state;
+    state.active = 0;
+    state.enabled = 1;
+    state.selected = 0;
+    state.visible = 1;
 
-        AwWindow* win = (*core->create_window)(&_agwin_app, NULL, &winclock_class,
-            style, state, 200+20*i, 197+30*i, 100+10*i, 100, "WinClock", 0);
-        if (win) {
-            win->bg_color = 14;
-            win->fg_color = i;
-        }
+    AwWindow* win = (*core->create_window)(&_agwin_app, NULL, &winclock_class,
+        style, state, 20, 20, 204, 214, "WinClock", 0);
+    if (win) {
+        win->bg_color = 14;
+        win->fg_color = 0;
     }
+
 	return 0;
 }
+
+/*
+    The table below was produced by this code (and then cleaned up a bit):
+
+    #include <stdio.h>
+    #include <math.h>
+
+    int main()
+    {
+        for (int i = 0; i < 12; i++) {
+            double angle = M_PI*i/6.0;
+            int mx = (int)(cos(angle-M_PI/2) * 256);
+            int my = (int)(sin(angle-M_PI/2) * 256);
+            printf("{ %i, %i }, // [%02i] time %02i:00, angle %f\n", mx, my, i, i, angle);
+        }
+        return 0;
+    }
+
+*/
+
+const struct {
+    int16_t x_mul;
+    int16_t y_mul;
+} multipliers[12] = {
+    {    0, -256 }, // [00] time 00:00, angle 0.000000
+    {  127, -221 }, // [01] time 01:00, angle 0.523599
+    {  221, -128 }, // [02] time 02:00, angle 1.047198
+    {  256,    0 }, // [03] time 03:00, angle 1.570796
+    {  221,  127 }, // [04] time 04:00, angle 2.094395
+    {  127,  221 }, // [05] time 05:00, angle 2.617994
+    {    0,  256 }, // [06] time 06:00, angle 3.141593
+    { -127,  221 }, // [07] time 07:00, angle 3.665191
+    { -221,  128 }, // [08] time 08:00, angle 4.188790
+    { -256,    0 }, // [09] time 09:00, angle 4.712389
+    { -221, -128 }, // [10] time 10:00, angle 5.235988
+    { -128, -221 }, // [11] time 11:00, angle 5.759587
+};
 
 int32_t on_paint_window(AwWindow* window, AwMsg* msg, bool* halt) {
     *halt = true; // no more handling after this
@@ -81,19 +117,43 @@ int32_t on_paint_window(AwWindow* window, AwMsg* msg, bool* halt) {
     (*core->paint_window)(msg); // paint borders and title bar, if needed
 
     AwDoMsgPaintWindow* paint_msg = &msg->do_paint_window;
-
     AwPaintFlags* paint_flags = &paint_msg->flags;
     if (paint_flags->client || paint_flags->window) {
         (*core->set_client_viewport)(window);
         vdp_set_graphics_colour(0, window->bg_color | 0x80);
         vdp_set_graphics_colour(0, window->fg_color);
-        AwRect rect = (*core->get_sizing_client_rect)(window);
-        int16_t center_x = (rect.left + rect.right) / 2;
-        int16_t center_y = (rect.top + rect.bottom) / 2;
-        vdp_move_to(center_x - 10, center_y - 10);
-        vdp_plot(0x95, center_x + 10 - 1, center_y + 10 - 1);
+        AwSize size = (*core->get_client_size)(window);
+        int16_t center_x = size.width / 2;
+        int16_t center_y = size.height / 2;
+        int16_t x_radius = (size.width * 9) / 20;
+
+        vdp_move_to(center_x - 5, center_y - 5);
+        vdp_plot(0x95, center_x + 5 - 1, center_y + 5 - 1);
+        //vdp_move_to(center_x - x_radius, center_y - x_radius);
+        //vdp_plot(0x95, center_x + x_radius - 1, center_y + x_radius - 1);
+        //printf("%i,%i ",center_x - x_radius, center_y - x_radius);
+        //printf("%i,%i\n",center_x + x_radius - 1, center_y + x_radius - 1);
+        return 0;
+
+        //int16_t y_radius = (size.height * 9) / 20; // ellipses not supported in VDP yet
+        //vdp_move_to(center_x - x_radius, center_y - x_radius);
+        //vdp_plot(0x95, center_x + x_radius - 1, center_y + x_radius - 1);
+        printf("%i,%i ", center_x - x_radius, center_y - x_radius);
+        printf("%i,%i\n", center_x + x_radius - 1, center_y + x_radius - 1);
+
+        int16_t dot_x_radius = size.width / 30;
+        //int16_t dot_y_radius = size.height / 30; // ellipses not supported in VDP yet
+        x_radius = (size.width * 8) / 20;
+        //y_radius = (size.height * 8) / 20; // ellipses not supported in VDP yet
+        for (int16_t i = 0; i < 12; i++) {
+            int16_t x_pos = center_x + (x_radius * multipliers[i].x_mul) / 256;
+            int16_t y_pos = center_y + (x_radius * multipliers[i].y_mul) / 256;
+            //vdp_move_to(x_pos - dot_x_radius, y_pos - dot_x_radius);
+            //vdp_plot(0x9D, x_pos + dot_x_radius - 1, y_pos + dot_x_radius - 1);
+            printf("%i: %i,%i ",i,x_pos - dot_x_radius, y_pos - dot_x_radius);
+            printf("%i,%i\n",x_pos + dot_x_radius - 1, y_pos + dot_x_radius - 1);
+        }
     }
-    printf("Garbage!");
 
     return 0;
 }
