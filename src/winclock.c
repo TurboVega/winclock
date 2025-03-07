@@ -125,33 +125,19 @@ int32_t on_paint_window(AwWindow* window, AwMsg* msg, bool* halt) {
         AwSize size = (*core->get_client_size)(window);
         int16_t center_x = size.width / 2;
         int16_t center_y = size.height / 2;
-        int16_t x_radius = (size.width * 9) / 20;
 
-        vdp_move_to(center_x - 5, center_y - 5);
-        vdp_plot(0x95, center_x + 5 - 1, center_y + 5 - 1);
-        //vdp_move_to(center_x - x_radius, center_y - x_radius);
-        //vdp_plot(0x95, center_x + x_radius - 1, center_y + x_radius - 1);
-        //printf("%i,%i ",center_x - x_radius, center_y - x_radius);
-        //printf("%i,%i\n",center_x + x_radius - 1, center_y + x_radius - 1);
-        return 0;
+        int16_t length = min(size.width, size.height);
+        int16_t radius = (length * 7) / 20;
+        vdp_move_to(center_x, center_y);
+        vdp_plot(0x95, center_x + radius, center_y + radius);
 
-        //int16_t y_radius = (size.height * 9) / 20; // ellipses not supported in VDP yet
-        //vdp_move_to(center_x - x_radius, center_y - x_radius);
-        //vdp_plot(0x95, center_x + x_radius - 1, center_y + x_radius - 1);
-        printf("%i,%i ", center_x - x_radius, center_y - x_radius);
-        printf("%i,%i\n", center_x + x_radius - 1, center_y + x_radius - 1);
-
-        int16_t dot_x_radius = size.width / 30;
-        //int16_t dot_y_radius = size.height / 30; // ellipses not supported in VDP yet
-        x_radius = (size.width * 8) / 20;
-        //y_radius = (size.height * 8) / 20; // ellipses not supported in VDP yet
+        int16_t dot_radius = length / 35;
+        radius = (length * 6) / 20;
         for (int16_t i = 0; i < 12; i++) {
-            int16_t x_pos = center_x + (x_radius * multipliers[i].x_mul) / 256;
-            int16_t y_pos = center_y + (x_radius * multipliers[i].y_mul) / 256;
-            //vdp_move_to(x_pos - dot_x_radius, y_pos - dot_x_radius);
-            //vdp_plot(0x9D, x_pos + dot_x_radius - 1, y_pos + dot_x_radius - 1);
-            printf("%i: %i,%i ",i,x_pos - dot_x_radius, y_pos - dot_x_radius);
-            printf("%i,%i\n",x_pos + dot_x_radius - 1, y_pos + dot_x_radius - 1);
+            int16_t x_pos = center_x + (radius * multipliers[i].x_mul) / 256;
+            int16_t y_pos = center_y + (radius * multipliers[i].y_mul) / 256;
+            vdp_move_to(x_pos, y_pos);
+            vdp_plot(0x9D, x_pos + dot_radius, y_pos + dot_radius);
         }
     }
 
