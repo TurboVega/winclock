@@ -39,6 +39,8 @@ AwClass winclock_class = { "winclock", NULL, winclock_handle_message };
 
 AwApplication _agwin_app = { "winclock", 0, 0, &winclock_class, NULL, 1 };
 
+AwRtcData rtc_data;
+
 int main( void )
 {
     core = _agwin_header.core_functions;
@@ -54,6 +56,7 @@ int main( void )
     style.sizeable = 1;
     style.moveable = 1;
     style.primary = 1;
+    style.need_rtc = 1;
 
     AwWindowState state;
     state.active = 0;
@@ -120,27 +123,45 @@ int32_t on_paint_window(AwWindow* window, AwMsg* msg, bool* halt) {
     AwPaintFlags* paint_flags = &paint_msg->flags;
     if (paint_flags->client || paint_flags->window) {
         (*core->set_client_viewport)(window);
-        vdp_set_graphics_colour(0, window->bg_color | 0x80);
-        vdp_set_graphics_colour(0, window->fg_color);
         AwSize size = (*core->get_client_size)(window);
         int16_t center_x = size.width / 2;
         int16_t center_y = size.height / 2;
 
+        vdp_set_graphics_colour(0, window->bg_color | 0x80);
+        vdp_set_graphics_colour(0, 15);
         int16_t length = min(size.width, size.height);
         int16_t radius = (length * 7) / 20;
         vdp_move_to(center_x, center_y);
+        vdp_plot(0x9D, center_x + radius, center_y + radius);
+
+        vdp_set_graphics_colour(0, window->fg_color);
+        vdp_move_to(center_x, center_y);
         vdp_plot(0x95, center_x + radius, center_y + radius);
 
-        int16_t dot_radius = length / 35;
-        radius = (length * 6) / 20;
+        int16_t dot_radius = length / 40;
+        radius = (length * 31) / 80;
         for (int16_t i = 0; i < 12; i++) {
             int16_t x_pos = center_x + (radius * multipliers[i].x_mul) / 256;
             int16_t y_pos = center_y + (radius * multipliers[i].y_mul) / 256;
             vdp_move_to(x_pos, y_pos);
             vdp_plot(0x9D, x_pos + dot_radius, y_pos + dot_radius);
         }
+
+        vdp_move_to(center_x, center_y);
+        vdp_write_at_graphics_cursor();
+        printf("%02hu:%02hu:%02hu:",
+            rtc_data.hour, rtc_data.minute, rtc_data.second);
     }
 
+    return 0;
+}
+
+int32_t on_rtc_event(AwWindow* window, AwMsg* msg, bool* halt) {
+    *halt = true; // no more handling after this
+    if (window->state.visible && !window->state.minimized) {
+        rtc_data = msg->on_real_time_clock_event.rtc;
+        (*core->invalidate_client)(window);
+    }
     return 0;
 }
 
@@ -152,6 +173,15 @@ int32_t winclock_handle_message(AwWindow* window, AwMsg* msg, bool* halt) {
         }
 
         default: {
+            switch (msg->on_common.msg_type) {
+                case Aw_On_RealTimeClockEvent: {
+                    on_rtc_event(window, msg, halt);
+                }
+
+                default: {
+                    break;
+                }
+            }
             break;
         }
     }
