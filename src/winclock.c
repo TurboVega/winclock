@@ -27,6 +27,9 @@ SOFTWARE.
 #include <agon/vdp_vdu.h>
 #include <stdio.h>
 
+// Missing from AgDev header file
+void vdp_set_rtc(int year, int month, int day, int hours, int minutes, int seconds);
+
 extern AwAppHeader _agwin_header;
 const AwFcnTable* core;
 
@@ -71,6 +74,8 @@ int main( void )
         win->fg_color = 0;
     }
 
+    vdp_set_rtc(2025, 12, 31, 23, 57, 41);
+
 	return 0;
 }
 
@@ -111,6 +116,11 @@ const struct {
     { -128, -221 }, // [11] time 11:00, angle 5.759587
 };
 
+typedef struct {
+    uint32_t seconds:10;
+    uint32_t minutes:6;
+} TimeFields;
+
 int32_t on_paint_window(AwWindow* window, AwMsg* msg, bool* halt) {
     *halt = true; // no more handling after this
     if (!window->state.visible) {
@@ -150,8 +160,13 @@ int32_t on_paint_window(AwWindow* window, AwMsg* msg, bool* halt) {
         vdp_move_to(center_x - 8*4, center_y - 8*2);
         vdp_write_at_graphics_cursor();
         vdp_set_graphics_colour(0, 7);
-        printf("%02hu:%02hu:%02hu",
-            rtc_data.hour, rtc_data.minute, rtc_data.second);
+
+        const uint8_t* b = (const uint8_t*)&rtc_data;
+        const uint32_t t = *((const uint32_t*)&rtc_data);
+        uint8_t hour = (uint8_t)((t & 0x03E00000) >> 21);
+        uint8_t minute = (uint8_t)((t & 0xFC000000) >> 26);
+        uint8_t second = b[4];
+        printf("%02hu:%02hu:%02hu", hour, minute, second);
     }
 
     return 0;
@@ -160,7 +175,7 @@ int32_t on_paint_window(AwWindow* window, AwMsg* msg, bool* halt) {
 int32_t on_rtc_event(AwWindow* window, AwMsg* msg, bool* halt) {
     *halt = true; // no more handling after this
     if (window->state.visible && !window->state.minimized) {
-        rtc_data = msg->on_real_time_clock_event.rtc;
+        rtc_data.rtc_data = msg->on_real_time_clock_event.rtc.rtc_data;
         (*core->invalidate_client)(window);
     }
     return 0;
