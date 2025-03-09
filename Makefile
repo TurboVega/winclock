@@ -10,12 +10,15 @@ HAS_EXIT_HANDLER = 0
 
 # This is the load address of the application, unless the
 # value is overridden from the outside by a strong variable.
-INIT_LOC ?= 040000
+WINCLOCK_INIT_LOC ?= 040000
+INIT_LOC = $(WINCLOCK_INIT_LOC)
 
-# These 2 variables do not determine the physical location
-# if the BSS section, but they do determine its size.
-BSSHEAP_LOW = 080000
-BSSHEAP_HIGH = 080FFF
+# These are the BSS addresses of the application, unless the
+# values are overridden from the outside by strong variables.
+WINCLOCK_BSSHEAP_LOW ?= 050000
+WINCLOCK_BSSHEAP_HIGH ?= 050FFF
+BSSHEAP_LOW = $(WINCLOCK_BSSHEAP_LOW)
+BSSHEAP_HIGH = $(WINCLOCK_BSSHEAP_HIGH)
 
 CFLAGS = -Wall -Wextra -Oz
 CXXFLAGS = -Wall -Wextra -Oz
