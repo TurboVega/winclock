@@ -8,9 +8,14 @@ COMPRESSED = NO
 HAS_ARG_PROCESSING = 0
 HAS_EXIT_HANDLER = 0
 
-INIT_LOC = 048000
-BSSHEAP_LOW = 04B000
-BSSHEAP_HIGH = 04BFFF
+# This is the load address of the application, unless the
+# value is overridden from the outside by a strong variable.
+INIT_LOC ?= 040000
+
+# These 2 variables do not determine the physical location
+# if the BSS section, but they do determine its size.
+BSSHEAP_LOW = 080000
+BSSHEAP_HIGH = 080FFF
 
 CFLAGS = -Wall -Wextra -Oz
 CXXFLAGS = -Wall -Wextra -Oz
