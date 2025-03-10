@@ -10,13 +10,13 @@ HAS_EXIT_HANDLER = 0
 
 # This is the load address of the application, unless the
 # value is overridden from the outside by a strong variable.
-WINCLOCK_INIT_LOC ?= 047000
+WINCLOCK_INIT_LOC ?= 048000
 INIT_LOC = $(WINCLOCK_INIT_LOC)
 
 # These are the BSS addresses of the application, unless the
 # values are overridden from the outside by strong variables.
-WINCLOCK_BSSHEAP_LOW ?= 04A000
-WINCLOCK_BSSHEAP_HIGH ?= 04AFFF
+WINCLOCK_BSSHEAP_LOW ?= 04B000
+WINCLOCK_BSSHEAP_HIGH ?= 04BFFF
 BSSHEAP_LOW = $(WINCLOCK_BSSHEAP_LOW)
 BSSHEAP_HIGH = $(WINCLOCK_BSSHEAP_HIGH)
 
