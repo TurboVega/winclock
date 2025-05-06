@@ -49,26 +49,36 @@ int main( void )
     core = _agwin_header.core_functions;
     winclock_class.parent = (*core->get_root_class)();
 
-    AwWindowStyle style;
-    style.border = 1;
-    style.title_bar = 1;
-    style.close_icon = 1;
-    style.minimize_icon = 1;
-    style.maximize_icon = 1;
-    style.menu_icon = 1;
-    style.sizeable = 1;
-    style.moveable = 1;
-    style.primary = 1;
-    style.need_rtc = 1;
+    AwCreateWindowParams params;
+    params.app = &_agwin_app;
+    params.parent = NULL;
+    params.wclass = &winclock_class;
+    params.style.border = 1;
+    params.style.title_bar = 1;
+    params.style.close_icon = 1;
+    params.style.minimize_icon = 1;
+    params.style.maximize_icon = 1;
+    params.style.menu_icon = 1;
+    params.style.sizeable = 1;
+    params.style.moveable = 1;
+    params.style.primary = 1;
+    params.style.need_rtc = 1;
+    params.state.active = 0;
+    params.state.enabled = 1;
+    params.state.selected = 0;
+    params.state.visible = 1;
+    params.context_id = AW_CONTEXT_ID_NEXT;
+    params.buffer_id = AW_BUFFER_ID_NEXT;
+    params.bitmap_id = AW_BITMAP_ID_NEXT;
+    params.x = 20;
+    params.y = 200;
+    params.width = 204;
+    params.height = 214;
+    params.text = "WinClock";
+    params.extra_data_size = 0;
 
-    AwWindowState state;
-    state.active = 0;
-    state.enabled = 1;
-    state.selected = 0;
-    state.visible = 1;
+    AwWindow* win = (*core->create_window)(&params);
 
-    AwWindow* win = (*core->create_window)(&_agwin_app, NULL, &winclock_class,
-        style, state, 20, 20, 204, 214, "WinClock", 0);
     if (win) {
         win->bg_color = 14;
         win->fg_color = 0;
