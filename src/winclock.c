@@ -26,6 +26,7 @@ SOFTWARE.
 #include "../../agwin/src/agwinmsg.h"
 #include <agon/vdp_vdu.h>
 #include <stdio.h>
+#include <string.h>
 
 // Missing from AgDev header file
 void vdp_set_rtc(int year, int month, int day, int hours, int minutes, int seconds);
@@ -44,12 +45,36 @@ AwApplication _agwin_app = { "winclock", 0, 0, &winclock_class, NULL, 1 };
 
 AwRtcData rtc_data;
 
-int main( void )
+uint32_t hex_to_bin(const char* number) {
+    uint32_t val = 0;
+    char ch;
+    while ((ch = *number++)) {
+        if (ch >= '0' && ch <= '9') {
+            val = (val << 4) | (ch - '0');
+        } else if (ch >= 'A' && ch <= 'F') {
+            val = (val << 4) | (ch - 'A' + 10);
+        } else if (ch >= 'a' && ch <= 'f') {
+            val = (val << 4) | (ch - 'a' + 10);
+        } else {
+            break;
+        }
+    }
+    return val;
+}
+
+int main(int argc, char* argv[])
 {
-    core = _agwin_header.core_functions;
+    if (argc < 2) {
+        return 1;
+    }
+
+    // Extract pointer to core functions list
+    core = (AwFcnTable*) hex_to_bin(argv[1]);
+
     winclock_class.parent = (*core->get_root_class)();
 
     AwCreateWindowParams params;
+    memset(&params, 0, sizeof(params));
     params.app = &_agwin_app;
     params.parent = NULL;
     params.wclass = &winclock_class;
@@ -63,19 +88,13 @@ int main( void )
     params.style.moveable = 1;
     params.style.primary = 1;
     params.style.need_rtc = 1;
-    params.state.active = 0;
     params.state.enabled = 1;
-    params.state.selected = 0;
     params.state.visible = 1;
-    params.context_id = AW_CONTEXT_ID_NEXT;
-    params.buffer_id = AW_BUFFER_ID_NEXT;
-    params.bitmap_id = AW_BITMAP_ID_NEXT;
     params.x = 20;
     params.y = 200;
     params.width = 204;
     params.height = 214;
     params.text = "WinClock";
-    params.extra_data_size = 0;
 
     AwWindow* win = (*core->create_window)(&params);
 
@@ -86,7 +105,7 @@ int main( void )
 
     vdp_set_rtc(2025, 12, 31, 23, 57, 41);
 
-	return 0;
+	return (int)(&_agwin_app);
 }
 
 /*

@@ -8,31 +8,22 @@ COMPRESSED = NO
 HAS_ARG_PROCESSING = 0
 HAS_EXIT_HANDLER = 0
 
-# This is the load address of the application, unless the
-# value is overridden from the outside by a strong variable.
-WINCLOCK_INIT_LOC ?= 048000
-INIT_LOC = $(WINCLOCK_INIT_LOC)
+# The RAM_START specifies where the app is loaded.
+# The RAM_SIZE specifies how much RAM the app will use.
+# The end of the app RAM is equal to RAM_START+RAM_SIZE.
+# Some weak variables are used in case their values are
+# overridden from the outside by strong variables.
 
-# These are the BSS addresses of the application, unless the
-# values are overridden from the outside by strong variables.
-WINCLOCK_BSSHEAP_LOW ?= 04B000
-WINCLOCK_BSSHEAP_HIGH ?= 04BFFF
-BSSHEAP_LOW = $(WINCLOCK_BSSHEAP_LOW)
-BSSHEAP_HIGH = $(WINCLOCK_BSSHEAP_HIGH)
+WINCLOCK_RAM_START ?= 0x058000
+RAM_START = $(WINCLOCK_RAM_START)
 
-CFLAGS = -Wall -Wextra -Oz
-CXXFLAGS = -Wall -Wextra -Oz
+WINCLOCK_RAM_SIZE ?= 0x008000
+RAM_SIZE = $(WINCLOCK_RAM_SIZE)
 
-#Unsure why the copy of this in makefile.mk doesn't cover this already...
-ifeq ($(OS),Windows_NT)
-COPYDIR ?= ( xcopy $1 $2 /S /Q /Y /I /K 1>nul 2>nul || call )
-else
-COPYDIR ?= cp -r $1 $2
-endif
+LDHAS_ARG_PROCESSING = 0
+LDHAS_EXIT_HANDLER = 0
 
-# Override the CRT0 for AgWin purposes
-LDCRT0 ?= $(call NATIVEPATH,src/crt0.src)
+include $(shell agondev-config --makefile)
 
-# ----------------------------
-
-include $(shell cedev-config --makefile)
+CFLAGS += -Wall -Wextra -Oz -DAGWIN_APP -DRAM_START=$(RAM_START) -DRAM_SIZE=$(RAM_SIZE)
+CXXFLAGS += -Wall -Wextra -Oz -DAGWIN_APP -DRAM_START=$(RAM_START) -DRAM_SIZE=$(RAM_SIZE)
