@@ -64,12 +64,12 @@ uint32_t hex_to_bin(const char* number) {
 
 int main(int argc, char* argv[])
 {
-    if (argc < 2) {
+    if (argc < 3) {
         return 1;
     }
 
     // Extract pointer to core functions list
-    core = (AwFcnTable*) hex_to_bin(argv[1]);
+    core = (AwFcnTable*) hex_to_bin(argv[2]);
 
     winclock_class.parent = (*core->get_root_class)();
 
