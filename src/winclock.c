@@ -73,6 +73,8 @@ int main(int argc, char* argv[])
 
     winclock_class.parent = (*core->get_root_class)();
 
+    vdp_set_rtc(2025, 5, 13, 2, 27, 40);
+
     AwCreateWindowParams params;
     memset(&params, 0, sizeof(params));
     params.app = &_agwin_app;
@@ -294,14 +296,14 @@ int32_t on_paint_foreground(AwWindow* window, AwMsg* msg, bool* halt) {
 
     hour %= 12;
     radius = (radius * 2) / 3;
-    x_pos = center_x + (radius * hour_points[hour].x_mul) / 256;
-    y_pos = center_y + (radius * hour_points[hour].y_mul) / 256;
+    x_pos = center_x + (radius * second_points[minute].x_mul) / 256;
+    y_pos = center_y + (radius * second_points[minute].y_mul) / 256;
     vdp_move_to(center_x, center_y);
     vdp_plot(0x05, x_pos, y_pos);
 
     radius /= 2;
-    x_pos = center_x + (radius * second_points[minute].x_mul) / 256;
-    y_pos = center_y + (radius * second_points[minute].y_mul) / 256;
+    x_pos = center_x + (radius * hour_points[hour].x_mul) / 256;
+    y_pos = center_y + (radius * hour_points[hour].y_mul) / 256;
     vdp_move_to(center_x, center_y);
     vdp_plot(0x05, x_pos, y_pos);
 
