@@ -286,16 +286,47 @@ int32_t on_paint_foreground(AwWindow* window, AwMsg* msg, bool* halt) {
     uint8_t hour = (uint8_t)((t & 0x03E00000) >> 21);
     uint8_t minute = (uint8_t)((t & 0xFC000000) >> 26);
     uint8_t second = b[4];
-    printf("%02hu:%02hu:%02hu", hour, minute, second);
+
+    int16_t x_pos = center_x + (radius * second_points[second].x_mul) / 256;
+    int16_t y_pos = center_y + (radius * second_points[second].y_mul) / 256;
+    vdp_move_to(center_x, center_y);
+    vdp_plot(0x05, x_pos, y_pos);
+
+    hour %= 12;
+    radius = (radius * 2) / 3;
+    x_pos = center_x + (radius * hour_points[hour].x_mul) / 256;
+    y_pos = center_y + (radius * hour_points[hour].y_mul) / 256;
+    vdp_move_to(center_x, center_y);
+    vdp_plot(0x05, x_pos, y_pos);
+
+    radius /= 2;
+    x_pos = center_x + (radius * second_points[minute].x_mul) / 256;
+    y_pos = center_y + (radius * second_points[minute].y_mul) / 256;
+    vdp_move_to(center_x, center_y);
+    vdp_plot(0x05, x_pos, y_pos);
 
     return 0;
 }
 
 int32_t on_rtc_event(AwWindow* window, AwMsg* msg, bool* halt) {
     *halt = true; // no more handling after this
-    if (window->state.visible && !window->state.minimized) {
+    if (window->state.visible) {
         rtc_data.rtc_data = msg->on_real_time_clock_event.rtc.rtc_data;
-        (*core->invalidate_client)(window);
+
+        const uint8_t* b = (const uint8_t*)&rtc_data;
+        const uint32_t t = *((const uint32_t*)&rtc_data);
+        uint8_t hour = (uint8_t)((t & 0x03E00000) >> 21);
+        uint8_t minute = (uint8_t)((t & 0xFC000000) >> 26);
+        uint8_t second = b[4];
+        char txt[20];
+        sprintf(txt, "WinClock %02hu:%02hu:%02hu", hour, minute, second);
+        (*core->set_text)(window, txt);
+
+        if (window->state.minimized) {
+            (*core->invalidate_title_bar)(window);
+        } else {
+            (*core->invalidate_window)(window);
+        }
     }
     return 0;
 }
