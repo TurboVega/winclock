@@ -91,7 +91,7 @@ int main(int argc, char* argv[])
     params.state.enabled = 1;
     params.state.visible = 1;
     params.x = 20;
-    params.y = 200;
+    params.y = 40;
     params.width = 204;
     params.height = 214;
     params.text = "WinClock";
@@ -233,68 +233,60 @@ typedef struct {
     uint32_t minutes:6;
 } TimeFields;
 
-int32_t on_paint_window(AwWindow* window, AwMsg* msg, bool* halt) {
+int32_t on_paint_foreground(AwWindow* window, AwMsg* msg, bool* halt) {
+    (void) msg; // unused
     *halt = true; // no more handling after this
-    if (!window->state.visible) {
-        return 0;
+
+    (*core->set_client_viewport_for_buffer)(window);
+    AwSize size = (*core->get_client_size)(window);
+    int16_t center_x = size.width / 2;
+    int16_t center_y = size.height / 2;
+
+    vdp_set_graphics_colour(0, window->bg_color | 0x80);
+    vdp_set_graphics_colour(0, 15);
+    int16_t length = min(size.width, size.height);
+    int16_t radius = (length * 7) / 20;
+    vdp_move_to(center_x, center_y);
+    vdp_plot(0x9D, center_x + radius, center_y + radius);
+
+    vdp_set_graphics_colour(0, window->fg_color);
+    vdp_move_to(center_x, center_y);
+    vdp_plot(0x95, center_x + radius, center_y + radius);
+
+    uint8_t skip = 0;
+    int16_t dot_radius = length / 80;
+    radius = (length * 31) / 80;
+    for (int16_t i = 0; i < 60; i++) {
+        if (skip++ == 0) {
+            continue;
+        }
+        int16_t x_pos = center_x + (radius * second_points[i].x_mul) / 256;
+        int16_t y_pos = center_y + (radius * second_points[i].y_mul) / 256;
+        vdp_move_to(x_pos, y_pos);
+        vdp_plot(0x9D, x_pos + dot_radius, y_pos + dot_radius);
+        if (skip == 5) {
+            skip = 0;
+        }
     }
 
-    (*core->paint_window)(msg); // paint borders and title bar, if needed
-
-    AwDoMsgPaintWindow* paint_msg = &msg->do_paint_window;
-    AwPaintFlags* paint_flags = &paint_msg->flags;
-    if (paint_flags->client || paint_flags->window) {
-        (*core->set_client_viewport)(window);
-        AwSize size = (*core->get_client_size)(window);
-        int16_t center_x = size.width / 2;
-        int16_t center_y = size.height / 2;
-
-        vdp_set_graphics_colour(0, window->bg_color | 0x80);
-        vdp_set_graphics_colour(0, 15);
-        int16_t length = min(size.width, size.height);
-        int16_t radius = (length * 7) / 20;
-        vdp_move_to(center_x, center_y);
-        vdp_plot(0x9D, center_x + radius, center_y + radius);
-
-        vdp_set_graphics_colour(0, window->fg_color);
-        vdp_move_to(center_x, center_y);
-        vdp_plot(0x95, center_x + radius, center_y + radius);
-
-        uint8_t skip = 0;
-        int16_t dot_radius = length / 80;
-        radius = (length * 31) / 80;
-        for (int16_t i = 0; i < 60; i++) {
-            if (skip++ == 0) {
-                continue;
-            }
-            int16_t x_pos = center_x + (radius * second_points[i].x_mul) / 256;
-            int16_t y_pos = center_y + (radius * second_points[i].y_mul) / 256;
-            vdp_move_to(x_pos, y_pos);
-            vdp_plot(0x9D, x_pos + dot_radius, y_pos + dot_radius);
-            if (skip == 5) {
-                skip = 0;
-            }
-        }
-
-        dot_radius = length / 60;
-        for (int16_t i = 0; i < 12; i++) {
-            int16_t x_pos = center_x + (radius * hour_points[i].x_mul) / 256;
-            int16_t y_pos = center_y + (radius * hour_points[i].y_mul) / 256;
-            vdp_move_to(x_pos, y_pos);
-            vdp_plot(0x9D, x_pos + dot_radius, y_pos + dot_radius);
-        }
-
-        vdp_move_to(center_x - 8*4, center_y - 8*2);
-        vdp_write_at_graphics_cursor();
-        vdp_set_graphics_colour(0, 7);
-
-        const uint8_t* b = (const uint8_t*)&rtc_data;
-        const uint32_t t = *((const uint32_t*)&rtc_data);
-        uint8_t hour = (uint8_t)((t & 0x03E00000) >> 21);
-        uint8_t minute = (uint8_t)((t & 0xFC000000) >> 26);
-        uint8_t second = b[4];
-        printf("%02hu:%02hu:%02hu", hour, minute, second);
+    dot_radius = length / 60;
+    for (int16_t i = 0; i < 12; i++) {
+        int16_t x_pos = center_x + (radius * hour_points[i].x_mul) / 256;
+        int16_t y_pos = center_y + (radius * hour_points[i].y_mul) / 256;
+        vdp_move_to(x_pos, y_pos);
+        vdp_plot(0x9D, x_pos + dot_radius, y_pos + dot_radius);
     }
+
+    vdp_move_to(center_x - 8*4, center_y - 8*2);
+    vdp_write_at_graphics_cursor();
+    vdp_set_graphics_colour(0, 7);
+
+    const uint8_t* b = (const uint8_t*)&rtc_data;
+    const uint32_t t = *((const uint32_t*)&rtc_data);
+    uint8_t hour = (uint8_t)((t & 0x03E00000) >> 21);
+    uint8_t minute = (uint8_t)((t & 0xFC000000) >> 26);
+    uint8_t second = b[4];
+    printf("%02hu:%02hu:%02hu", hour, minute, second);
 
     return 0;
 }
@@ -310,8 +302,8 @@ int32_t on_rtc_event(AwWindow* window, AwMsg* msg, bool* halt) {
 
 int32_t winclock_handle_message(AwWindow* window, AwMsg* msg, bool* halt) {
     switch (msg->do_common.msg_type) {
-        case Aw_Do_PaintWindow: {
-            on_paint_window(window, msg, halt);
+        case Aw_Do_PaintForeground: {
+            on_paint_foreground(window, msg, halt);
             break;
         }
 
