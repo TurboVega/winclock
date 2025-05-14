@@ -239,7 +239,6 @@ int32_t on_paint_foreground(AwWindow* window, AwMsg* msg, bool* halt) {
     (void) msg; // unused
     *halt = true; // no more handling after this
 
-    (*core->set_client_viewport_for_buffer)(window);
     AwSize size = (*core->get_client_size)(window);
     int16_t center_x = size.width / 2;
     int16_t center_y = size.height / 2;
