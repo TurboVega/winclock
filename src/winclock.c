@@ -253,6 +253,12 @@ int32_t on_paint_foreground(AwWindow* window, AwMsg* msg, bool* halt) {
     vdp_set_graphics_colour(0, window->fg_color);
     vdp_move_to(center_x, center_y);
     vdp_plot(0x95, center_x + radius, center_y + radius);
+/*
+    NOTE: Commented out drawing the dots for testing purposes.
+    This code is really not optimal. It should draw the dots
+    to a separate bitmap, and reuse that bitmap, and only draw
+    the clock hands. Or, it could draw the hands using XOR and
+    not need the bitmap. In any case, it could use improvement.
 
     uint8_t skip = 0;
     int16_t dot_radius = length / 80;
@@ -277,9 +283,7 @@ int32_t on_paint_foreground(AwWindow* window, AwMsg* msg, bool* halt) {
         vdp_move_to(x_pos, y_pos);
         vdp_plot(0x9D, x_pos + dot_radius, y_pos + dot_radius);
     }
-
-    vdp_move_to(center_x - 8*4, center_y - 8*2);
-    vdp_write_at_graphics_cursor();
+*/
     vdp_set_graphics_colour(0, 7);
 
     const uint8_t* b = (const uint8_t*)&rtc_data;
